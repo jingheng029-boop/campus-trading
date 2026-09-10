@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}升级账号 - 校园二手交易平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upgrade-card {
+        max-width: 450px;
+        margin: 60px auto;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .upgrade-card .card-header {
+        background: var(--mint-gradient) !important;
+        padding: 25px;
+    }
+    .upgrade-card .card-body {
+        padding: 30px;
+    }
+    .guest-badge {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card upgrade-card">
+                <div class="card-header text-white text-center">
+                    <h4 class="mb-0"><i class="bi bi-person-check me-2"></i>升级为正式账号</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <span class="guest-badge">
+                            <i class="bi bi-person"></i> 当前是游客账号
+                        </span>
+                        <p class="text-muted mt-2 mb-0">升级后可以享受更多功能</p>
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label fw-medium">用户名 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="设置用户名">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-medium">密码 <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required placeholder="设置密码">
+                        </div>
+                        <div class="mb-4">
+                            <label for="contact" class="form-label fw-medium">联系方式</label>
+                            <input type="text" class="form-control" id="contact" name="contact" placeholder="手机号/QQ/微信（选填）">
+                            <div class="form-text text-muted">其他用户可以通过此方式联系你</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i> 立即升级
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr>
+                    <div class="text-center">
+                        <a href="{{ url_for('index') }}" class="text-muted">暂不升级，先逛逛</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

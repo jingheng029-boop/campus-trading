@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}发布商品 - 校园二手交易平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .publish-card .card-header {
+        background: var(--mint-gradient) !important;
+        border-radius: 16px 16px 0 0 !important;
+        padding: 20px 25px;
+    }
+    .publish-card .card-body {
+        padding: 30px;
+    }
+    .form-label {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+    .input-group-text {
+        background: var(--light-bg);
+        border: 1.5px solid #E0E0E0;
+        color: var(--primary-color);
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+    }
+    /* 图片上传区域 */
+    .upload-area {
+        border: 2px dashed var(--primary-light);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--light-bg);
+    }
+    .upload-area:hover {
+        border-color: var(--primary-color);
+        background: rgba(46, 204, 135, 0.05);
+    }
+    .upload-area i {
+        font-size: 3rem;
+        color: var(--primary-light);
+    }
+    .upload-area:hover i {
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card publish-card">
+                <div class="card-header text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i> 发布商品</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">商品标题 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" required placeholder="请输入商品名称">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="price" class="form-label">售价 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">¥</span>
+                                    <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="original_price" class="form-label">原价 <span class="text-muted">(选填)</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">¥</span>
+                                    <input type="number" class="form-control" id="original_price" name="original_price" step="0.01" min="0" placeholder="商品原价" oninput="calculateReferencePrice()">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">参考售价</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">¥</span>
+                                    <input type="text" class="form-control" id="reference_price" readonly placeholder="根据原价和成色计算">
+                                </div>
+                                <div class="form-text text-muted" style="font-size: 0.75rem;">根据原价×成色折扣计算，仅供参考</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="category" class="form-label">分类 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">请选择分类</option>
+                                    <option value="教材">教材资料</option>
+                                    <option value="数码">数码产品</option>
+                                    <option value="生活">生活用品</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="condition" class="form-label">商品成色 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="condition" name="condition" required onchange="calculateReferencePrice()">
+                                    <option value="">请选择成色</option>
+                                    <option value="全新">全新 (9折)</option>
+                                    <option value="九成新">九成新 (8折)</option>
+                                    <option value="八成新">八成新 (7折)</option>
+                                    <option value="七成新">七成新 (6折)</option>
+                                    <option value="六成及以下">六成及以下 (5折)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <script>
+                        function calculateReferencePrice() {
+                            const originalPrice = parseFloat(document.getElementById('original_price').value);
+                            const condition = document.getElementById('condition').value;
+                            const referenceInput = document.getElementById('reference_price');
+
+                            const discountRates = {
+                                '全新': 0.9,
+                                '九成新': 0.8,
+                                '八成新': 0.7,
+                                '七成新': 0.6,
+                                '六成及以下': 0.5
+                            };
+
+                            if (originalPrice && condition && discountRates[condition]) {
+                                const referencePrice = originalPrice * discountRates[condition];
+                                referenceInput.value = referencePrice.toFixed(2);
+                            } else {
+                                referenceInput.value = '';
+                            }
+                        }
+                        </script>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label">商品图片</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*" onchange="previewImage(event)">
+                            <div class="form-text">支持 JPG、PNG、GIF 格式，最大 16MB</div>
+                            <div id="imagePreview" class="mt-2" style="display: none;">
+                                <img id="previewImg" src="" alt="预览" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                            </div>
+                        </div>
+
+                        <script>
+                        function previewImage(event) {
+                            const file = event.target.files[0];
+                            const preview = document.getElementById('imagePreview');
+                            const img = document.getElementById('previewImg');
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    img.src = e.target.result;
+                                    preview.style.display = 'block';
+                                };
+                                reader.readAsDataURL(file);
+                            } else {
+                                preview.style.display = 'none';
+                            }
+                        }
+                        </script>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">商品描述</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" placeholder="请详细描述商品的情况，包括新旧程度、功能是否正常、购买时间等"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> 发布商品
+                            </button>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">取消</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

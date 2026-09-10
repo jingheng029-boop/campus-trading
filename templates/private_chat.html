@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}与{{ other_user.username }}聊天 - 校园二手交易平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: calc(100vh - 350px);
+        min-height: 350px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    .message {
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 75%;
+        word-wrap: break-word;
+    }
+
+    .message.sent {
+        background: #005293;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 2px;
+    }
+
+    .message.received {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-bottom-left-radius: 2px;
+    }
+
+    .message.system {
+        background: #e9ecef;
+        color: #6c757d;
+        text-align: center;
+        max-width: 100%;
+        font-size: 0.85rem;
+        border-radius: 20px;
+    }
+
+    .message-img {
+        max-width: 200px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .message-goods {
+        background: white;
+        border: 2px solid #005293;
+        border-radius: 10px;
+        padding: 10px;
+        max-width: 220px;
+    }
+
+    .message-goods-img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .message-time {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .chat-input-area {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+
+    .goods-preview {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .goods-preview-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .upload-btn {
+        cursor: pointer;
+        color: #005293;
+        font-size: 1.5rem;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .upload-btn:hover {
+        background: #e9ecef;
+    }
+
+    .image-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+    }
+
+    .image-modal img {
+        max-width: 90%;
+        max-height: 90%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <!-- 商品信息 -->
+                <div class="card-header">
+                    <div class="goods-preview">
+                        {% if goods.image %}
+                        <img src="{{ url_for('static', filename=goods.image.replace('static/', '')) }}" class="goods-preview-img" alt="{{ goods.title }}">
+                        {% else %}
+                        <div class="goods-preview-img bg-white d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="text-decoration-none text-dark">
+                                <strong>{{ goods.title }}</strong>
+                            </a>
+                            <div class="text-danger">¥{{ goods.price }}</div>
+                            <small class="text-muted">卖家: {{ goods.seller.username }}</small>
+                        </div>
+                        <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="btn btn-sm btn-outline-primary ms-auto">
+                            查看商品
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 聊天区域 -->
+                <div class="card-body">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="messages" data-room-id="{{ chat_room.id }}">
+                            {% for msg in messages %}
+                            <div class="message {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                                {% if msg.message_type == 'image' %}
+                                <img src="{{ url_for('static', filename=msg.content.replace('static/', '')) }}"
+                                     class="message-img"
+                                     onclick="showImage(this.src)">
+                                {% elif msg.message_type == 'goods_link' %}
+                                <div class="message-goods">
+                                    <img src="{{ url_for('static', filename=goods.image.replace('static/', '')) if goods.image else '' }}"
+                                         class="message-goods-img">
+                                    <div class="mt-2"><strong>{{ goods.title }}</strong></div>
+                                    <div class="text-danger">¥{{ goods.price }}</div>
+                                    <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="btn btn-sm btn-primary mt-2">查看详情</a>
+                                </div>
+                                {% else %}
+                                {{ msg.content }}
+                                {% endif %}
+                                                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- 输入区域 -->
+                        <div class="chat-input-area">
+                            <div class="d-flex gap-2 align-items-center">
+                                <!-- 上传图片 -->
+                                <label class="upload-btn" title="发送图片">
+                                    <i class="bi bi-image"></i>
+                                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                                </label>
+
+                                <!-- 发送商品链接 -->
+                                <button class="btn btn-outline-primary btn-sm" onclick="sendGoodsLink()" title="发送商品链接">
+                                    <i class="bi bi-link-45deg"></i> 商品
+                                </button>
+
+                                <input type="text" id="messageInput" class="form-control" placeholder="输入消息..." autocomplete="off">
+
+                                <button class="btn btn-primary" onclick="sendMessage()">
+                                    <i class="bi bi-send"></i> 发送
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图片查看弹窗 -->
+<div class="image-modal" id="imageModal" onclick="closeImage()">
+    <img id="modalImage" src="">
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const socket = io();
+    const roomId = {{ chat_room.id }};
+
+    // 加入房间
+    socket.on('connect', function() {
+        socket.emit('join_room', {room_id: roomId});
+    });
+
+    // 接收新消息
+    socket.on('new_private_message', function(data) {
+        if (data.sender_id !== {{ current_user.id }}) {
+            addMessage(data, false);
+        }
+    });
+
+    function addMessage(data, isSent) {
+        const messagesDiv = document.getElementById('messages');
+        let contentHtml = '';
+
+        if (data.type === 'image') {
+            contentHtml = `<img src="/${data.content}" class="message-img" onclick="showImage('/${data.content}')">`;
+        } else if (data.type === 'goods_link') {
+            contentHtml = `
+                <div class="message-goods">
+                    <img src="{{ url_for('static', filename=goods.image.replace('static/', '')) if goods.image else '' }}" class="message-goods-img">
+                    <div class="mt-2"><strong>{{ goods.title }}</strong></div>
+                    <div class="text-danger">¥{{ goods.price }}</div>
+                    <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="btn btn-sm btn-primary mt-2">查看详情</a>
+                </div>
+            `;
+        } else {
+            contentHtml = data.content;
+        }
+
+        const html = `
+            <div class="message ${isSent ? 'sent' : 'received'}">
+                ${contentHtml}
+                            </div>
+        `;
+
+        messagesDiv.insertAdjacentHTML('beforeend', html);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const msg = input.value.trim();
+
+        if (msg) {
+            socket.emit('private_message', {
+                room_id: roomId,
+                type: 'text',
+                content: msg
+            });
+            addMessage({
+                sender_id: {{ current_user.id }},
+                content: msg,
+                time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})
+            }, true);
+            input.value = '';
+        }
+    }
+
+    // 图片上传
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('room_id', roomId);
+
+        fetch('/chat/upload_image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                socket.emit('private_message', {
+                    room_id: roomId,
+                    type: 'image',
+                    content: data.filename
+                });
+                addMessage({
+                    sender_id: {{ current_user.id }},
+                    type: 'image',
+                    content: data.filename,
+                    time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})
+                }, true);
+            }
+        });
+
+        this.value = '';
+    });
+
+    // 发送商品链接
+    function sendGoodsLink() {
+        socket.emit('private_message', {
+            room_id: roomId,
+            type: 'goods_link',
+            content: '{{ goods.id }}'
+        });
+        addMessage({
+            sender_id: {{ current_user.id }},
+            type: 'goods_link',
+            content: '',
+            time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})
+        }, true);
+    }
+
+    // 回车发送
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // 图片查看
+    function showImage(src) {
+        document.getElementById('modalImage').src = src;
+        document.getElementById('imageModal').style.display = 'block';
+    }
+
+    function closeImage() {
+        document.getElementById('imageModal').style.display = 'none';
+    }
+
+    // 滚动到底部
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+</script>
+{% endblock %}

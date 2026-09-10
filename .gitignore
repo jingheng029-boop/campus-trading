@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# 数据库
+*.db
+*.sqlite
+instance/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 上传的文件
+static/uploads/*
+static/chat/*
+!static/uploads/.gitkeep
+!static/chat/.gitkeep
+
+# 环境变量
+.env

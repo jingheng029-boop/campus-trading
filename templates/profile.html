@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}个人中心 - 校园二手交易平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 侧边菜单 */
+    .profile-menu .card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .profile-menu .card-header {
+        background: var(--mint-gradient);
+        padding: 25px;
+    }
+    .profile-menu .card-body {
+        padding: 0;
+    }
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--mint-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 2.5rem;
+        color: white;
+    }
+    .profile-menu .list-group-item {
+        border: none;
+        padding: 15px 20px;
+        transition: all 0.2s ease;
+    }
+    .profile-menu .list-group-item:hover {
+        background: var(--light-bg);
+        padding-left: 25px;
+    }
+    .profile-menu .list-group-item.active {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        font-weight: 600;
+    }
+    .profile-menu .list-group-item i {
+        margin-right: 10px;
+    }
+
+    /* 统计卡片 */
+    .stat-card {
+        border-radius: 16px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-card .card-body {
+        padding: 20px;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        background: var(--mint-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .stat-card:nth-child(1) .stat-number { color: var(--primary-color); }
+    .stat-card:nth-child(2) .stat-number { color: #FF8C69; }
+    .stat-card:nth-child(3) .stat-number { color: var(--primary-dark); }
+
+    /* 表单样式 */
+    .form-label {
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+    .form-control:read-only {
+        background: var(--light-bg);
+        border-color: #eee;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- 左侧菜单 -->
+        <div class="col-md-3 mb-4 profile-menu">
+            <div class="card">
+                <div class="card-header text-white text-center">
+                    <div class="profile-avatar">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <h5 class="mb-1">{{ current_user.username }}</h5>
+                    {% if current_user.is_guest %}
+                    <span class="badge bg-warning text-dark">游客</span>
+                    {% endif %}
+                    <p class="mb-0 small opacity-75">注册于 {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('profile') }}" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-person"></i> 个人资料
+                    </a>
+                    <a href="{{ url_for('my_goods') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-box"></i> 我的商品
+                    </a>
+                    <a href="{{ url_for('my_favorites') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-heart"></i> 我的收藏
+                    </a>
+                    {% if current_user.is_guest %}
+                    <a href="{{ url_for('upgrade_account') }}" class="list-group-item list-group-item-action text-primary">
+                        <i class="bi bi-star"></i> 升级账号
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧内容 -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person me-2"></i>个人资料</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card stat-card bg-light">
+                                <div class="card-body text-center">
+                                    <div class="stat-number">{{ current_user.goods.count() }}</div>
+                                    <p class="mb-0 text-muted">发布商品</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card bg-light">
+                                <div class="card-body text-center">
+                                    <div class="stat-number">{{ current_user.favorites.count() }}</div>
+                                    <p class="mb-0 text-muted">收藏商品</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card bg-light">
+                                <div class="card-body text-center">
+                                    <div class="stat-number">{{ current_user.comments.count() }}</div>
+                                    <p class="mb-0 text-muted">留言记录</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="mb-3"><i class="bi bi-info-circle me-2"></i>账户信息</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-control" value="{{ current_user.username }}" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">联系方式</label>
+                            <input type="text" class="form-control" value="{{ current_user.contact or '未设置' }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">注册时间</label>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">用户ID</label>
+                            <input type="text" class="form-control" value="#{{ current_user.id }}" readonly>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('publish_goods') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> 发布商品
+                        </a>
+                        <a href="{{ url_for('my_goods') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-box me-1"></i> 管理我的商品
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

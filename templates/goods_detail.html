@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}{{ goods.title }} - 校园二手交易平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 商品图片容器 */
+    .goods-image-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+        border-radius: 16px;
+        overflow: hidden;
+        padding: 20px;
+    }
+    .goods-image-container img {
+        transition: transform 0.4s ease;
+        border-radius: 12px;
+    }
+    .goods-image-container:hover img {
+        transform: scale(1.03);
+    }
+
+    /* 商品信息项 */
+    .info-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    .info-item i {
+        color: var(--primary-color);
+        margin-right: 8px;
+    }
+
+    /* 留言项 */
+    .comment-item {
+        transition: all 0.2s ease;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        background: #fafafa;
+    }
+    .comment-item:hover {
+        background: #f0f0f0;
+        transform: translateX(5px);
+    }
+    .comment-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--mint-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+
+    /* 价格区域 */
+    .price-display {
+        background: linear-gradient(135deg, rgba(46, 204, 135, 0.1), rgba(136, 216, 176, 0.1));
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    .price-original {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 0.9rem;
+    }
+    .price-ref {
+        font-size: 0.85rem;
+        color: var(--primary-color);
+        background: var(--primary-light);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+
+    /* 面包屑美化 */
+    .breadcrumb {
+        background: transparent;
+    }
+    .breadcrumb-item a {
+        color: var(--primary-color);
+    }
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">首页</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('goods_list', category=goods.category) }}">{{ goods.category }}</a></li>
+            <li class="breadcrumb-item active">{{ goods.title[:20] }}...</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- 商品图片 -->
+        <div class="col-md-6 mb-4">
+            <div class="goods-image-container">
+                {% if goods.image %}
+                <img src="{{ url_for('static', filename=goods.image.replace('static/', '')) }}" class="card-img-top" alt="{{ goods.title }}" style="max-height: 450px; width: 100%; object-fit: contain;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px; border-radius: 12px;">
+                    <div class="text-center">
+                        <i class="bi bi-image text-muted" style="font-size: 6rem;"></i>
+                        <p class="text-muted mt-2">暂无图片</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 商品信息 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="category-badge">{{ goods.category }}</span>
+                        <span class="status-badge status-{{ 'on-sale' if goods.status == '在售' else 'sold' }}">
+                            {{ goods.status }}
+                        </span>
+                    </div>
+
+                    <h3 class="card-title mb-3" style="font-weight: 600;">{{ goods.title }}</h3>
+
+                    <div class="price-display">
+                        <div class="d-flex align-items-baseline gap-3">
+                            <span class="price-tag" style="font-size: 2.2rem;">¥{{ goods.price }}</span>
+                            {% if goods.original_price %}
+                            <span class="price-original">原价: ¥{{ goods.original_price }}</span>
+                            {% endif %}
+                        </div>
+                        {% if goods.get_reference_price() %}
+                        <div class="mt-2">
+                            <span class="price-ref"><i class="bi bi-calculator"></i> 参考价: ¥{{ goods.get_reference_price() }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="mb-2 info-item"><strong><i class="bi bi-tag"></i> 商品分类：</strong><span class="category-badge">{{ goods.category }}</span></p>
+                        <p class="mb-2 info-item"><strong><i class="bi bi-patch-check"></i> 商品成色：</strong>{{ goods.condition }}</p>
+                        <p class="mb-2 info-item"><strong><i class="bi bi-person"></i> 发布卖家：</strong>
+                            <a href="#" class="text-decoration-none">{{ goods.seller.username }}</a>
+                        </p>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="d-flex gap-2 mb-4">
+                        {% if current_user.is_authenticated %}
+                            {% if is_favorited %}
+                            <a href="{{ url_for('add_favorite', goods_id=goods.id) }}" class="btn btn-danger">
+                                <i class="bi bi-heart-fill"></i> 已收藏
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('add_favorite', goods_id=goods.id) }}" class="btn btn-outline-danger">
+                                <i class="bi bi-heart"></i> 收藏
+                            </a>
+                            {% endif %}
+
+                            {% if goods.user_id == current_user.id %}
+                            <a href="{{ url_for('edit_goods', goods_id=goods.id) }}" class="btn btn-warning">
+                                <i class="bi bi-pencil"></i> 编辑
+                            </a>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="bi bi-trash"></i> 删除
+                            </button>
+                            {% else %}
+                            <a href="{{ url_for('start_chat', goods_id=goods.id) }}" class="btn btn-success">
+                                <i class="bi bi-chat-dots"></i> 联系卖家
+                            </a>
+                            {% endif %}
+                        {% else %}
+                        <a href="{{ url_for('login') }}?next={{ request.path }}" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i> 登录后联系卖家
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- 删除确认弹窗 -->
+                    {% if current_user.is_authenticated and goods.user_id == current_user.id %}
+                    <div class="modal fade" id="deleteModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">确认删除</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>确定要删除商品「{{ goods.title }}」吗？此操作不可恢复。</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                    <form action="{{ url_for('delete_goods', goods_id=goods.id) }}" method="POST">
+                                        <button type="submit" class="btn btn-danger">确认删除</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品描述 -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-card-text"></i> 商品描述</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ goods.description or '暂无描述' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 留言区 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> 留言区 <span class="badge bg-secondary">{{ comments|length }}</span></h5>
+                </div>
+                <div class="card-body">
+                    <!-- 留言列表 -->
+                    {% for comment in comments %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <strong><i class="bi bi-person-circle"></i> {{ comment.user.username }}</strong>
+                        </div>
+                        <p class="mb-0 mt-2">{{ comment.content }}</p>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">暂无留言，快来抢先留言吧！</p>
+                    {% endfor %}
+
+                    <!-- 添加留言 -->
+                    {% if current_user.is_authenticated %}
+                    <hr>
+                    <form action="{{ url_for('add_comment', goods_id=goods.id) }}" method="POST">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="content" rows="3" placeholder="写下你的留言..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> 提交留言
+                        </button>
+                    </form>
+                    {% else %}
+                    <hr>
+                    <div class="text-center">
+                        <a href="{{ url_for('login') }}?next={{ request.path }}" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i> 登录后留言
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

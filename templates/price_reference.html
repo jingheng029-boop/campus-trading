@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}价格参考 - 校园二手交易平台{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0"><i class="bi bi-calculator"></i> 价格参考功能</h4>
+                </div>
+                <div class="card-body">
+                    <h5>如何计算参考价格？</h5>
+                    <p>本系统提供简单的价格参考功能，根据商品的原价和成色来估算合理的二手交易价格。</p>
+
+                    <hr>
+
+                    <h6>计算公式：</h6>
+                    <div class="alert alert-info">
+                        <strong>参考价格 = 原价 × 成色系数</strong>
+                    </div>
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>成色</th>
+                                <th>系数</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>全新</td>
+                                <td>0.9</td>
+                                <td>未使用或几乎全新</td>
+                            </tr>
+                            <tr>
+                                <td>九成新</td>
+                                <td>0.7</td>
+                                <td>有明显使用痕迹但功能正常</td>
+                            </tr>
+                            <tr>
+                                <td>八成新</td>
+                                <td>0.5</td>
+                                <td>较好，仍可正常使用</td>
+                            </tr>
+                            <tr>
+                                <td>七成新</td>
+                                <td>0.35</td>
+                                <td>有明显磨损</td>
+                            </tr>
+                            <tr>
+                                <td>六成新及以下</td>
+                                <td>0.2</td>
+                                <td>老旧或有损坏</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <hr>
+
+                    <h6>示例：</h6>
+                    <ul>
+                        <li>原价 100 元的全新教材 → 参考价约 90 元</li>
+                        <li>原价 500 元的八成新数码产品 → 参考价约 250 元</li>
+                        <li>原价 50 元的七成新生活用品 → 参考价约 18 元</li>
+                    </ul>
+
+                    <div class="alert alert-warning mt-4">
+                        <i class="bi bi-info-circle"></i> 注意：此价格仅供参考，实际交易价格由买卖双方自行协商确定。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

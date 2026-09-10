@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}注册 - 校园二手交易平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-card {
+        max-width: 420px;
+        margin: 60px auto;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .auth-card .card-header {
+        background: var(--mint-gradient) !important;
+        padding: 30px 20px;
+        border: none;
+    }
+    .auth-card .card-header h4 {
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+    .auth-card .card-body {
+        padding: 35px;
+    }
+    .auth-card .input-group-text {
+        background-color: var(--light-bg);
+        border: 1.5px solid #E0E0E0;
+        border-right: none;
+        color: var(--primary-color);
+    }
+    .auth-card .form-control {
+        border-left: none;
+        padding: 12px 15px;
+    }
+    .auth-card .form-control:focus {
+        border-left: none;
+    }
+    .auth-card .btn-primary {
+        padding: 12px;
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+    }
+    .auth-illustration {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .auth-illustration i {
+        font-size: 4rem;
+        background: var(--mint-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .auth-footer {
+        text-align: center;
+        padding-top: 15px;
+    }
+    .auth-footer a {
+        font-weight: 600;
+    }
+    .form-text {
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card auth-card">
+                <div class="card-header text-white text-center">
+                    <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i> 用户注册</h4>
+                </div>
+                <div class="card-body">
+                    <div class="auth-illustration">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-medium">用户名 <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名" required>
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            </div>
+                            <div class="form-text text-muted mt-1">用于登录和展示</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-medium">密码 <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码" required>
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="contact" class="form-label fw-medium">联系方式</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="contact" name="contact" placeholder="手机号/QQ/微信（选填）">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                            </div>
+                            <div class="form-text text-muted mt-1">其他用户可以通过此方式联系你</div>
+                        </div>
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i> 注 册
+                            </button>
+                        </div>
+                    </form>
+                    <div class="auth-footer text-muted">
+                        <p class="mb-0">已有账号？ <a href="{{ url_for('login') }}" class="text-decoration-none">立即登录</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

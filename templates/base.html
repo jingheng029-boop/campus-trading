@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}校园二手交易平台{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        /* 薄荷绿 + 奶油白 清新配色 */
+        :root {
+            --primary-color: #2ECC87;      /* 薄荷绿 */
+            --primary-dark: #27AE60;       /* 深薄荷绿 */
+            --primary-light: #A8E6CF;      /* 浅薄荷绿 */
+            --secondary-color: #88D8B0;    /* 浅绿 */
+            --accent-color: #FF8C69;       /* 珊瑚橙 */
+            --light-bg: #FAFCF9;           /* 奶油白/淡绿背景 */
+            --card-bg: #FFFFFF;            /* 卡片白 */
+            --text-primary: #2C3E50;       /* 深灰文字 */
+            --text-secondary: #7F8C8D;     /* 浅灰文字 */
+            --mint-gradient: linear-gradient(135deg, #2ECC87, #88D8B0);
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text-primary);
+        }
+
+        /* 导航栏 - 薄荷绿渐变 */
+        .navbar {
+            background: var(--mint-gradient) !important;
+            box-shadow: 0 2px 15px rgba(46, 204, 135, 0.25);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        /* 主按钮 - 薄荷绿 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* 卡片 - 白色 + 柔和阴影 */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(46, 204, 135, 0.1);
+            transition: all 0.3s ease;
+            background-color: var(--card-bg);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(46, 204, 135, 0.2);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 2px solid var(--light-bg);
+            font-weight: 600;
+        }
+
+        /* 分类标签 - 薄荷绿胶囊 */
+        .category-badge {
+            background: var(--mint-gradient);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* 价格标签 - 珊瑚橙 */
+        .price-tag {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        /* 状态标签 */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .status-on-sale {
+            background-color: #D5F5E3;
+            color: #1E8449;
+        }
+
+        .status-sold {
+            background-color: #FADBD8;
+            color: #C0392B;
+        }
+
+        /* 页脚 */
+        .footer {
+            background-color: white;
+            padding: 25px 0;
+            margin-top: 50px;
+            border-top: 1px solid #E8F5E9;
+        }
+
+        /* 搜索框 - 薄荷绿边框 */
+        .search-box {
+            border-radius: 25px;
+            border: 2px solid var(--primary-light);
+            padding: 8px 20px;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 204, 135, 0.15);
+        }
+
+        /* 英雄区 - 薄荷绿渐变 */
+        .hero-section {
+            background: var(--mint-gradient);
+            color: white;
+            padding: 70px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 40px 40px;
+        }
+
+        .hero-section h1 {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* 闪消息样式 - 薄荷绿风格 */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+        }
+
+        .alert-success {
+            background-color: #D5F5E3;
+            color: #1E8449;
+        }
+
+        .alert-danger {
+            background-color: #FADBD8;
+            color: #C0392B;
+        }
+
+        .alert-warning {
+            background-color: #FCF3CF;
+            color: #9A7D0A;
+        }
+
+        .alert-info {
+            background-color: #D6EAF8;
+            color: #1A5276;
+        }
+
+        /* 页面加载淡入 */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 商品卡片悬浮效果 */
+        .goods-card {
+            cursor: pointer;
+        }
+
+        .goods-card .card {
+            height: 100%;
+        }
+
+        /* 按钮悬浮效果 - 轻微上浮 + 阴影 */
+        .btn {
+            transition: all 0.25s ease;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 135, 0.3);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* 输入框聚焦效果 - 薄荷绿 */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(46, 204, 135, 0.25);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1.5px solid #E0E0E0;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* 分类图标悬浮效果 */
+        .category-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .category-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* 下拉菜单 */
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 8px;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        /* 链接样式 */
+        a {
+            color: var(--primary-color);
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        /* 页脚文字 */
+        .footer p {
+            color: var(--text-secondary);
+        }
+
+        /* 背景装饰 - 淡淡的网格图案 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(46, 204, 135, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 140, 105, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-shop"></i> 校园二手交易平台
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('goods_list') }}">全部商品</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('chat_list') }}"><i class="bi bi-envelope"></i> 消息</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('chat') }}"><i class="bi bi-chat-dots"></i> 聊天室</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- 搜索框 -->
+                <form class="d-flex me-3" action="{{ url_for('search') }}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="搜商品..." aria-label="Search" style="border-radius: 20px;">
+                    <button class="btn btn-light" type="submit" style="border-radius: 20px;">
+                        <i class="bi bi-search" style="color: var(--primary-color);"></i>
+                    </button>
+                </form>
+
+                <!-- 用户菜单 -->
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('publish_goods') }}">
+                                <i class="bi bi-plus-circle"></i> 发布商品
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}">个人中心</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('my_goods') }}">我的商品</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('my_favorites') }}">我的收藏</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出登录</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">登录</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">注册</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 闪消息显示 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {% if category == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                {% elif category == 'danger' %}<i class="bi bi-exclamation-triangle-fill"></i>
+                {% elif category == 'warning' %}<i class="bi bi-exclamation-circle-fill"></i>
+                {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- 主内容区 -->
+    {% block content %}{% endblock %}
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="text-muted mb-0">
+                <i class="bi bi-mortarboard"></i> 计算机综合课程设计 - 校园二手交易平台
+            </p>
+            <p class="text-muted small mb-0">基于 Flask + SQLite 开发</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

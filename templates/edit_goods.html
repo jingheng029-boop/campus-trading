@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}编辑商品 - 校园二手交易平台{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0"><i class="bi bi-pencil"></i> 编辑商品</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">商品标题 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ goods.title }}" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="price" class="form-label">售价 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">¥</span>
+                                    <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" value="{{ goods.price }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="original_price" class="form-label">原价 <span class="text-muted">(选填)</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">¥</span>
+                                    <input type="number" class="form-control" id="original_price" name="original_price" step="0.01" min="0" value="{{ goods.original_price or '' }}" placeholder="商品原价" oninput="calculateReferencePrice()">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">参考售价</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">¥</span>
+                                    <input type="text" class="form-control" id="reference_price" readonly placeholder="根据原价和成色计算">
+                                </div>
+                                <div class="form-text text-muted" style="font-size: 0.75rem;">根据原价×成色折扣计算</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="category" class="form-label">分类 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="教材" {% if goods.category == '教材' %}selected{% endif %}>教材资料</option>
+                                    <option value="数码" {% if goods.category == '数码' %}selected{% endif %}>数码产品</option>
+                                    <option value="生活" {% if goods.category == '生活' %}selected{% endif %}>生活用品</option>
+                                    <option value="其他" {% if goods.category == '其他' %}selected{% endif %}>其他</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="condition" class="form-label">商品成色 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="condition" name="condition" required onchange="calculateReferencePrice()">
+                                    <option value="">请选择成色</option>
+                                    <option value="全新" {% if goods.condition == '全新' %}selected{% endif %}>全新 (9折)</option>
+                                    <option value="九成新" {% if goods.condition == '九成新' %}selected{% endif %}>九成新 (8折)</option>
+                                    <option value="八成新" {% if goods.condition == '八成新' %}selected{% endif %}>八成新 (7折)</option>
+                                    <option value="七成新" {% if goods.condition == '七成新' %}selected{% endif %}>七成新 (6折)</option>
+                                    <option value="六成及以下" {% if goods.condition == '六成及以下' %}selected{% endif %}>六成及以下 (5折)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="status" class="form-label">商品状态</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="在售" {% if goods.status == '在售' %}selected{% endif %}>在售</option>
+                                    <option value="已售出" {% if goods.status == '已售出' %}selected{% endif %}>已售出</option>
+                                    <option value="已下架" {% if goods.status == '已下架' %}selected{% endif %}>已下架</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <script>
+                        function calculateReferencePrice() {
+                            const originalPrice = parseFloat(document.getElementById('original_price').value);
+                            const condition = document.getElementById('condition').value;
+                            const referenceInput = document.getElementById('reference_price');
+
+                            const discountRates = {
+                                '全新': 0.9,
+                                '九成新': 0.8,
+                                '八成新': 0.7,
+                                '七成新': 0.6,
+                                '六成及以下': 0.5
+                            };
+
+                            if (originalPrice && condition && discountRates[condition]) {
+                                const referencePrice = originalPrice * discountRates[condition];
+                                referenceInput.value = referencePrice.toFixed(2);
+                            } else {
+                                referenceInput.value = '';
+                            }
+                        }
+                        // 页面加载时计算一次
+                        window.onload = calculateReferencePrice;
+                        </script>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label">更换图片</label>
+                            {% if goods.image %}
+                            <div class="mb-2">
+                                <img src="{{ url_for('static', filename=goods.image.replace('static/', '')) }}" style="max-height: 100px;" class="img-thumbnail">
+                            </div>
+                            {% endif %}
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <div class="form-text">不更换则保持原图</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">商品描述</label>
+                            <textarea class="form-control" id="description" name="description" rows="5">{{ goods.description or '' }}</textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-check-circle"></i> 保存修改
+                            </button>
+                            <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="btn btn-outline-secondary">取消</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

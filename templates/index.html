@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 校园二手交易平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 分类卡片 - 玻璃态效果 */
+    .category-card {
+        transition: all 0.3s ease;
+        border-radius: 16px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(46, 204, 135, 0.25);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    .category-card .icon-wrapper {
+        transition: transform 0.3s ease;
+    }
+    .category-card:hover .icon-wrapper {
+        transform: scale(1.2);
+    }
+
+    /* 商品卡片增强 */
+    .goods-card .card {
+        overflow: hidden;
+    }
+    .goods-card .card-img-top {
+        transition: transform 0.4s ease;
+    }
+    .goods-card:hover .card-img-top {
+        transform: scale(1.08);
+    }
+    .goods-card .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* 收藏按钮心跳动画 */
+    .btn-favorite {
+        transition: all 0.2s ease;
+    }
+    .btn-favorite:active {
+        transform: scale(0.85);
+    }
+    .btn-favorite:hover {
+        animation: heartbeat 0.3s ease;
+    }
+    @keyframes heartbeat {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+
+    /* 加载动画 */
+    .shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* 步骤图标 */
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .step-icon i {
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 英雄区域 -->
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 mb-3">🎓 校园二手交易平台</h1>
+        <p class="lead mb-4">让闲置物品找到新主人，让校园生活更环保</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('goods_list') }}" class="btn btn-light btn-lg">
+                <i class="bi bi-bag"></i> 浏览商品
+            </a>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-person-plus"></i> 立即注册
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 分类导航 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col">
+                            <a href="{{ url_for('goods_list', category='all') }}" class="text-decoration-none">
+                                <div class="category-card text-center p-3 bg-light rounded">
+                                    <div class="icon-wrapper">
+                                        <i class="bi bi-grid display-4 text-primary"></i>
+                                    </div>
+                                    <p class="mt-2 mb-0 text-dark fw-medium">全部商品</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a href="{{ url_for('goods_list', category='教材') }}" class="text-decoration-none">
+                                <div class="category-card text-center p-3 bg-light rounded">
+                                    <div class="icon-wrapper">
+                                        <i class="bi bi-book display-4 text-success"></i>
+                                    </div>
+                                    <p class="mt-2 mb-0 text-dark fw-medium">教材资料</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a href="{{ url_for('goods_list', category='数码') }}" class="text-decoration-none">
+                                <div class="category-card text-center p-3 bg-light rounded">
+                                    <div class="icon-wrapper">
+                                        <i class="bi bi-laptop display-4 text-info"></i>
+                                    </div>
+                                    <p class="mt-2 mb-0 text-dark fw-medium">数码产品</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a href="{{ url_for('goods_list', category='生活') }}" class="text-decoration-none">
+                                <div class="category-card text-center p-3 bg-light rounded">
+                                    <div class="icon-wrapper">
+                                        <i class="bi bi-house display-4 text-warning"></i>
+                                    </div>
+                                    <p class="mt-2 mb-0 text-dark fw-medium">生活用品</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a href="{{ url_for('goods_list', category='其他') }}" class="text-decoration-none">
+                                <div class="category-card text-center p-3 bg-light rounded">
+                                    <div class="icon-wrapper">
+                                        <i class="bi bi-three-dots display-4 text-secondary"></i>
+                                    </div>
+                                    <p class="mt-2 mb-0 text-dark fw-medium">其他</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 平台使用说明 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" style="background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="bi bi-info-circle text-primary me-2"></i>平台使用说明
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="step-icon">
+                                    <i class="bi bi-plus-circle-fill text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">发布商品</h6>
+                                    <small class="text-muted">点击"发布商品"，填写商品信息并上传图片</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="step-icon">
+                                    <i class="bi bi-search text-success"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">浏览&筛选</h6>
+                                    <small class="text-muted">通过分类或关键词搜索想要的商品</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="step-icon">
+                                    <i class="bi bi-chat-dots text-info"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">联系&交易</h6>
+                                    <small class="text-muted">点击"联系卖家"私信沟通，线下交易</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最新商品 -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+                <i class="bi bi-clock-history text-primary"></i> 最新商品
+            </h4>
+            <a href="{{ url_for('goods_list') }}" class="btn btn-sm btn-outline-primary">
+                查看全部 <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for goods in goods_list %}
+        <div class="col-md-6 col-lg-4 mb-4 goods-card">
+            <div class="card h-100">
+                <div class="img-wrapper" style="height: 200px; overflow: hidden; position: relative;">
+                    {% if goods.image %}
+                    <img src="{{ goods.image }}" class="card-img-top" alt="{{ goods.title }}" style="height: 100%; width: 100%; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 100%;">
+                        <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    {% endif %}
+                    <!-- 悬浮时显示快捷操作 -->
+                    <div class="card-img-overlay d-flex align-items-center justify-content-center" style="opacity: 0; background: rgba(0,0,0,0.3); transition: opacity 0.3s;">
+                        <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="btn btn-light btn-lg">
+                            <i class="bi bi-eye"></i> 查看详情
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="category-badge">{{ goods.category }}</span>
+                        <span class="status-badge status-{{ 'on-sale' if goods.status == '在售' else 'sold' }}">
+                            {{ goods.status }}
+                        </span>
+                    </div>
+                    <h5 class="card-title" style="font-weight: 600;">
+                        <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="text-decoration-none text-dark">
+                            {{ goods.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted small" style="line-height: 1.5;">{{ goods.description[:60] if goods.description else '暂无描述' }}...</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="price-tag">¥{{ goods.price }}</span>
+                        <small class="text-muted">
+                            <i class="bi bi-person"></i> {{ goods.seller.username }}
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center" style="border-top: 1px solid #f0f0f0;">
+                    <small class="text-muted">
+                    </small>
+                    <div class="d-flex gap-2">
+                        {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('add_favorite', goods_id=goods.id) }}" class="btn btn-sm btn-favorite btn-outline-danger" title="收藏">
+                            <i class="bi bi-heart"></i>
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('goods_detail', goods_id=goods.id) }}" class="btn btn-sm btn-primary">
+                            查看 <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-inbox" style="font-size: 5rem; color: var(--primary-light);"></i>
+            </div>
+            <h4 class="text-muted mb-3">还没有商品哦</h4>
+            <p class="text-muted mb-4">快去发布第一个商品吧，让闲置物品找到新主人～</p>
+            <a href="{{ url_for('publish_goods') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> 发布商品
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
