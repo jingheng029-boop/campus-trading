@@ -48,7 +48,11 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 # 初始化 SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
 app.config['SECRET_KEY'] = 'campus-trading-secret-key-2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "campus_trading.db")}'
+# Railway数据库路径
+if os.environ.get('RAILWAY'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "instance", "campus_trading.db")}'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "campus_trading.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # 文件上传配置
